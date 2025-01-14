@@ -34,7 +34,7 @@ namespace AdoNetCore
             this.com.Connection = this.cn;
             this.com.CommandType = CommandType.Text;
             this.com.CommandText = sql;
-            this.cn.OpenAsync();
+            await this.cn.CloseAsync();
             this.reader = this.com.ExecuteReader();
             this.lstSalas.Items.Clear();
             while (await this.reader.ReadAsync())
@@ -42,8 +42,8 @@ namespace AdoNetCore
                 string nombre = this.reader["NOMBRE"].ToString();
                 this.lstSalas.Items.Add(nombre);
             }
-            this.reader.CloseAsync();
-            this.cn.CloseAsync();
+            await this.reader.CloseAsync();
+            await this.cn.CloseAsync();
         }
 
         private async void btnModificarSala_Click(object sender, EventArgs e)
@@ -62,10 +62,10 @@ namespace AdoNetCore
             this.com.Connection = this.cn;
             this.com.CommandType = CommandType.Text;
             this.com.CommandText = sql;
-            this.cn.OpenAsync();
+            await this.cn.CloseAsync();
             int afectados =
                 await this.com.ExecuteNonQueryAsync();
-            this.cn.CloseAsync();
+            await this.cn.CloseAsync();
             this.com.Parameters.Clear();
             this.CargarSalas();
             MessageBox.Show("Salas modificadas "+ afectados);
