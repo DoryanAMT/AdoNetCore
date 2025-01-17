@@ -129,6 +129,7 @@ namespace AdoNetCore.Repositories
             await this.reader.CloseAsync();
             await this.cn.CloseAsync();
             this.com.Parameters.Clear();
+            return datos;
         }
     }
 }
