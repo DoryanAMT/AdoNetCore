@@ -9,23 +9,16 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Diagnostics.Metrics;
 
 # region STORED PROCEDURES
-//create procedure SP_ALL_HOSPITALES
-//as
-//	select * from HOSPITAL
-//go
-
-//create procedure SP_UPDATEPLANTILLA_HOSPITAL
+//ALTER procedure[dbo].[SP_UPDATEPLANTILLA_HOSPITAL]
 //(@nombre nvarchar(50), @incremento int)
 //as
 //	declare @hospitalcod int
 //	select @hospitalcod = HOSPITAL_COD from HOSPITAL
 //	where NOMBRE = @nombre
 //	update PLANTILLA set SALARIO = SALARIO + @incremento
-//	where HOSPITAL_COD=@hospitalcod
-
-//	select * from PLANTILLA 
 //	where HOSPITAL_COD=@hospitalcod
 //go
 #endregion
@@ -106,15 +99,12 @@ namespace AdoNetCore
                 string salario = this.reader["SALARIO"].ToString();
                 this.lstPlantilla.Items.Add(apellido + " - " + salario);
             }
-            
-
-            
+                        
             await this.reader.CloseAsync();
             await this.cn.CloseAsync();
             this.com.Parameters.Clear();
             MessageBox.Show("Registros afectados: " + afectados);
         }
 
-      
+        }
     }
-}
