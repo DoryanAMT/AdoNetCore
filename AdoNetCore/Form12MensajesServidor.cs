@@ -8,6 +8,26 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Diagnostics.Metrics;
+
+#region
+//alter procedure SP_ALL_DEPARTAMENTOS
+//as
+//	select DEPT_NO, DNOMBRE, LOC from DEPARTAMENTOS
+//go
+
+//alter procedure INSERT_DEPARTAMENTO(@numero as int, @nombre as nvarchar(50), @localidad as nvarchar(50))
+//as
+//	if(@localidad = 'TERUEL')
+//	begin
+//		print 'TERUEL NO EXISTE'
+//	end
+//	else
+//	begin
+//		insert into DEPARTAMENTOS values(@numero, @nombre, @localidad)
+//	end
+//go
+#endregion
 
 namespace AdoNetCore
 {
@@ -23,31 +43,42 @@ namespace AdoNetCore
             this.cn = new SqlConnection(connectionString);
             this.com = new SqlCommand();
             this.com.Connection = this.cn;
-            this.LoadDepartamentos();
+
+            // RECUPERAMOS EL EVENTO DE MENSAJES DE LA CONEXION
+            this.cn.InfoMessage += Cn_InfoMessage;
+
+
+            //this.LoadDepartamentos();
         }
 
-        public async Task LoadDepartamentos()
+        private void Cn_InfoMessage(object sender, SqlInfoMessageEventArgs e)
         {
-            string sql = "SP_ALL_DEPARTAMENTOS";
-            this.com.CommandType = CommandType.StoredProcedure;
-            this.com.CommandText = sql;
-            await this.cn.OpenAsync();
-            this.reader = await this.com.ExecuteReaderAsync();
-            this.lstDepartamentos.Items.Clear();
-            while (await this.reader.ReadAsync())
-            {
-                string dept_no = this.reader["DEPT_NO"].ToString();
-                string dnombre = this.reader["DNOMBRE"].ToString();
-                string loc = this.reader["LOC"].ToString();
-                this.lstDepartamentos.Items.Add(dept_no + " - " + dnombre + " " + loc);
-            }
-
-            await this.reader.CloseAsync();
-            await this.cn.CloseAsync();
+            this.lblMensaje.Text = e.Message;
         }
 
-        public async Task InsertDepartamento
-            (string dept_no, string dnombre, string loc)
+        //public async Task LoadDepartamentos()
+        //{
+        //    this.lblMensaje.Text = "";
+        //    string sql = "SP_ALL_DEPARTAMENTOS";
+        //    this.com.CommandType = CommandType.StoredProcedure;
+        //    this.com.CommandText = sql;
+        //    await this.cn.OpenAsync();
+        //    this.reader = await this.com.ExecuteReaderAsync();
+        //    this.lstDepartamentos.Items.Clear();
+        //    while (await this.reader.ReadAsync())
+        //    {
+        //        string dept_no = this.reader["DEPT_NO"].ToString();
+        //        string dnombre = this.reader["DNOMBRE"].ToString();
+        //        string loc = this.reader["LOC"].ToString();
+        //        this.lstDepartamentos.Items.Add(dept_no + " - " + dnombre + " " + loc);
+        //    }
+
+        //    await this.reader.CloseAsync();
+        //    await this.cn.CloseAsync();
+        //}
+
+        public void InsertDepartamento
+            (int dept_no, string dnombre, string loc)
         {
             string sql = "INSERT_DEPARTAMENTO";
             this.com.Parameters.AddWithValue("@numero", dept_no);
@@ -55,21 +86,21 @@ namespace AdoNetCore
             this.com.Parameters.AddWithValue("@localidad", loc);
             this.com.CommandType = CommandType.StoredProcedure;
             this.com.CommandText = sql;
-            await this.cn.OpenAsync();
-            await this.reader.CloseAsync();
-            await this.com.ExecuteNonQueryAsync();
-            await this.cn.CloseAsync();
+            this.cn.Open();
+            int afectados =  this.com.ExecuteNonQuery();
+            this.cn.Close();
             this.com.Parameters.Clear();
-
+            MessageBox.Show("Afectados: " + afectados);
         }
 
         private async void btnInsertar_Click(object sender, EventArgs e)
         {
-            string dept_no = this.txtNumero.Text;
+            this.lblMensaje.Text = "";
+            int dept_no = int.Parse(this.txtNumero.Text);
             string dnombre = this.txtNombre.Text;
             string loc = this.txtLocalidad.Text;
-            await InsertDepartamento(dept_no, dnombre, loc);
-            await this.LoadDepartamentos();
+            this.InsertDepartamento(dept_no, dnombre, loc);
+            //await this.LoadDepartamentos();
         }
     }
 }
