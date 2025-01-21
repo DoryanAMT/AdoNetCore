@@ -17,7 +17,7 @@ namespace AdoNetCore.Repositories
 
         public RepositoryHospitales()
         {
-            string connectionString = @"Data Source=LOCALHOST\DESARROLLO;Initial Catalog=HOSPITAL;Persist Security Info=True;User ID=SA;Trust Server Certificate=True";
+            string connectionString = @"Data Source=LOCALHOST\SQLEXPRESS;Initial Catalog=HOSPITAL;Persist Security Info=True;User ID=SA;Trust Server Certificate=True";
             this.cn = new SqlConnection(connectionString);
             this.com = new SqlCommand();
             this.com.Connection = this.cn;
@@ -63,12 +63,32 @@ namespace AdoNetCore.Repositories
 
             this.com.CommandType = CommandType.Text;
             this.com.CommandText = sql;
+            await this.cn.OpenAsync();
             await this.com.ExecuteNonQueryAsync();
             await this.cn.CloseAsync();
             this.com.Parameters.Clear();
         }
 
-        public async Task DeleteDepartamentoAsync
+        public async Task UpdateHospitalAsync
+            (int id, string nombre, string direccion, string telefono, int numCamas)
+        {
+            string sql = "update HOSPITAL set HOSPITAL_COD=@id, NOMBRE=@nombre," +
+                "DIRECCION=@direccion, TELEFONO=@telefono, NUM_CAMA=@numcama " +
+                "where HOSPITAL_COD=@id";
+            this.com.Parameters.AddWithValue("@id", id);
+            this.com.Parameters.AddWithValue("@nombre", nombre);
+            this.com.Parameters.AddWithValue("@direccion", direccion);
+            this.com.Parameters.AddWithValue("@telefono", telefono);
+            this.com.Parameters.AddWithValue("@numcama", numCamas);
+            this.com.CommandType = CommandType.Text;
+            this.com.CommandText = sql;
+            await this.cn.OpenAsync();
+            await this.com.ExecuteNonQueryAsync();
+            await this.cn.CloseAsync();
+            this.com.Parameters.Clear();
+        }
+
+        public async Task DeleteHospitalAsync
             (int id)
         {
             string sql = "delete from HOSPITAL where HOSPITAL_COD=@id";

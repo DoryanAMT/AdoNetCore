@@ -12,13 +12,31 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 using System.Diagnostics.Metrics;
 
 # region STORED PROCEDURES
-//ALTER procedure[dbo].[SP_UPDATEPLANTILLA_HOSPITAL]
+//create procedure SP_ALL_HOSPITAL
+//as
+//	select * from HOSPITAL
+//go
+
+//create procedure SP_GETPLANTILLA_HOSPITAL
+//(@nombre as nvarchar(50))
+//as
+//	declare @hospitalcod int
+//	select @hospitalcod = HOSPITAL_COD 
+//	from HOSPITAL
+//	where @nombre=NOMBRE
+//	select * from PLANTILLA
+//	inner join HOSPITAL
+//	on PLANTILLA.HOSPITAL_COD = HOSPITAL.HOSPITAL_COD
+//	where PLANTILLA.HOSPITAL_COD=@hospitalcod
+//go
+
+//alter procedure SP_UPDATEPLANTILLA_HOSPITAL  
 //(@nombre nvarchar(50), @incremento int)
 //as
 //	declare @hospitalcod int
 //	select @hospitalcod = HOSPITAL_COD from HOSPITAL
-//	where NOMBRE = @nombre
-//	update PLANTILLA set SALARIO = SALARIO + @incremento
+//	where NOMBRE=@nombre
+//	update PLANTILLA set SALARIO=SALARIO + @incremento
 //	where HOSPITAL_COD=@hospitalcod
 //go
 #endregion
@@ -33,7 +51,7 @@ namespace AdoNetCore
         public Form11UpdatePlantillaProcedures()
         {
             InitializeComponent();
-            string connectionString = @"Data Source=LOCALHOST\DESARROLLO;Initial Catalog=HOSPITAL;Persist Security Info=True;User ID=SA;Trust Server Certificate=True";
+            string connectionString = @"Data Source=LOCALHOST\SQLEXPRESS;Initial Catalog=HOSPITAL;Persist Security Info=True;User ID=SA;Trust Server Certificate=True";
             this.cn = new SqlConnection(connectionString);
             this.com = new SqlCommand();
             this.com.Connection = this.cn;
@@ -57,54 +75,51 @@ namespace AdoNetCore
             await this.reader.CloseAsync();
             await this.cn.CloseAsync();
         }
-        private async void cmbHospital_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            string sql = "SP_PLANTILLA_HOSPITAL_NB";
-            this.com.CommandType = CommandType.StoredProcedure;
-            this.com.CommandText= sql;
-            this.com.Parameters.AddWithValue("@nombre", this.cmbHospital.SelectedItem.ToString());
-            await this.cn.OpenAsync();
-            this.reader = await this.com.ExecuteReaderAsync();
-            this.lstPlantilla.Items.Clear();
-            while (await this.reader.ReadAsync())
-            {
-                string apellido = this.reader["APELLIDO"].ToString();
-                string salario = this.reader["SALARIO"].ToString();
-                this.lstPlantilla.Items.Add(apellido + " - " + salario);
-            }
-            await this.reader.CloseAsync();
-            await this.cn.CloseAsync();
-            this.com.Parameters.Clear();
-        }
-
         private async void btnModificarSalario_Click(object sender, EventArgs e)
         {
             string nombre = this.cmbHospital.SelectedItem.ToString();
             int incremento = int.Parse(this.txtIncremento.Text);
-            
             string sql = "SP_UPDATEPLANTILLA_HOSPITAL";
             this.com.Parameters.AddWithValue("@nombre", nombre);
             this.com.Parameters.AddWithValue("@incremento", incremento);
             this.com.CommandType = CommandType.StoredProcedure;
             this.com.CommandText = sql;
             await this.cn.OpenAsync();
-            //int afectados = await this.com.ExecuteNonQueryAsync();
-            int afectados = 0;
+            int afectados = await this.com.ExecuteNonQueryAsync();
+            await this.cn.CloseAsync();
+            this.com.Parameters.Clear();
+            await this.LoadPlantilla(nombre);
+            MessageBox.Show("Registros modificados " + afectados);
+        }
+        public async Task LoadPlantilla(string nombre)
+        {
+            string sql = "SP_GETPLANTILLA_HOSPITAL";
+            this.com.Parameters.AddWithValue("@nombre", nombre);
+            this.com.CommandType = CommandType.StoredProcedure;
+            this.com.CommandText = sql;
+            await this.cn.OpenAsync();
             this.reader = await this.com.ExecuteReaderAsync();
             this.lstPlantilla.Items.Clear();
             while (await this.reader.ReadAsync())
             {
-                afectados++;
                 string apellido = this.reader["APELLIDO"].ToString();
                 string salario = this.reader["SALARIO"].ToString();
                 this.lstPlantilla.Items.Add(apellido + " - " + salario);
             }
-                        
             await this.reader.CloseAsync();
             await this.cn.CloseAsync();
             this.com.Parameters.Clear();
-            MessageBox.Show("Registros afectados: " + afectados);
         }
 
+
+        private async void cmbHospital_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (this.cmbHospital.SelectedIndex != -1)
+            {
+                string nombre =
+                    this.cmbHospital.SelectedItem.ToString();
+                await this.LoadPlantilla(nombre);
+            }
         }
     }
+}

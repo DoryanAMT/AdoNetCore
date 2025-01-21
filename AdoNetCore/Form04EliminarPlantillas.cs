@@ -24,7 +24,7 @@ namespace AdoNetCore
 
         private void CargarPlantilla()
         {
-            string connectionSting = @"Data Source=LOCALHOST\DESARROLLO;Initial Catalog=HOSPITAL;Persist Security Info=True;User ID=SA;Trust Server Certificate=True";
+            string connectionSting = @"Data Source=LOCALHOST\SQLEXPRESS;Initial Catalog=HOSPITAL;Persist Security Info=True;User ID=SA;Trust Server Certificate=True";
             this.cn = new SqlConnection(connectionSting);
             this.com = new SqlCommand();
             string sql = "select * from PLANTILLA";

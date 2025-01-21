@@ -21,7 +21,7 @@ namespace AdoNetCore
         public Form01PrimerAdo()
         {
             InitializeComponent();
-            this.connectionString = @"Data Source=LOCALHOST\DESARROLLO;Initial Catalog=HOSPITAL;Persist Security Info=True;User ID=SA;Trust Server Certificate=True"; ;
+            this.connectionString = @"Data Source=LOCALHOST\SQLEXPRESS;Initial Catalog=HOSPITAL;Persist Security Info=True;User ID=SA;Trust Server Certificate=True";
             this.cn = new SqlConnection(this.connectionString);
             this.com = new SqlCommand();
             this.cn.StateChange += Cn_StateChange;

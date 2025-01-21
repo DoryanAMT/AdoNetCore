@@ -27,15 +27,15 @@ namespace AdoNetCore
 
         private async void CargarSalas()
         {
-            string connectionString = @"Data Source=LOCALHOST\DESARROLLO;Initial Catalog=HOSPITAL;Persist Security Info=True;User ID=SA;Trust Server Certificate=True";
+            string connectionString = @"Data Source=LOCALHOST\SQLEXPRESS;Initial Catalog=HOSPITAL;Persist Security Info=True;User ID=SA;Trust Server Certificate=True";
             this.cn = new SqlConnection(connectionString);
             this.com = new SqlCommand();
             string sql = "select distinct NOMBRE from SALA";
             this.com.Connection = this.cn;
             this.com.CommandType = CommandType.Text;
             this.com.CommandText = sql;
-            await this.cn.CloseAsync();
-            this.reader = this.com.ExecuteReader();
+            await this.cn.OpenAsync();
+            this.reader = await this.com.ExecuteReaderAsync();
             this.lstSalas.Items.Clear();
             while (await this.reader.ReadAsync())
             {
@@ -62,7 +62,7 @@ namespace AdoNetCore
             this.com.Connection = this.cn;
             this.com.CommandType = CommandType.Text;
             this.com.CommandText = sql;
-            await this.cn.CloseAsync();
+            await this.cn.OpenAsync();
             int afectados =
                 await this.com.ExecuteNonQueryAsync();
             await this.cn.CloseAsync();
