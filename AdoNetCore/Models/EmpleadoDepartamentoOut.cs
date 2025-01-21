@@ -8,9 +8,9 @@ namespace AdoNetCore.Models
 {
     public class EmpleadoDepartamentoOut
     {
-        public List<string> nombre {  get; set; }
-        public int suma { get; set; }
-        public int media {  get; set; }
-        public int personas {  get; set; }
+        public List<string> Apellidos {  get; set; }
+        public int SumaSalarial { get; set; }
+        public int MediaSalarial {  get; set; }
+        public int Personas {  get; set; }
     }
 }

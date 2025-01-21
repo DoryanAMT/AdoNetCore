@@ -20,7 +20,7 @@ using Microsoft.Data.SqlClient;
 //, @personas int out)
 //as
 //	declare @id int
-//	select @id = DEPT_NO from DEPARTAMENTOS
+//	select @id = DEPT_NO from DEPT
 //	where DNOMBRE = @nombre
 //	select * from EMP where DEPT_NO = @id
 //	select @suma = sum(SALARIO), @media = AVG(SALARIO), @personas = count(EMP_NO) from EMP
@@ -43,7 +43,7 @@ namespace AdoNetCore
         public async void LoadDepartamentos()
         {
             List<string> departamentos =
-                await this.repo.LoadDepartamentosAsync();
+                await this.repo.GetDepartamentosAsync();
             this.cmbDepartamentos.Items.Clear();
             foreach (string departamento in departamentos)
             {
@@ -51,61 +51,19 @@ namespace AdoNetCore
             }
         }
 
-        public async void LoadEmpleadosDepartamento
-            (string nombre)
-        {
-            EmpleadoDepartamentoOut datos = 
-                await this.repo.LoadEmpleadosDepartamento(nombre);
-            while (datos.nombre )
-            {
-
-            }
-            
-        }
-
-        
-
         private async void btnMostrarDatos_Click(object sender, EventArgs e)
         {
-            string sql = "SP_EMPLEADOS_DEPT_OUT";
             string nombre = this.cmbDepartamentos.SelectedItem.ToString();
-            //  PARA LOS PARAMROS DE ENTRADA PODEMOS UTILIZAR
-            //  AddWithValue SIN PROBLEMAS
-            //  PARA LOS PARAMETROS DE ENTRADA ES IMPRESCINDIBLE
-            //  UTILIZAR OBJETOS Parameter
-            this.com.Parameters.AddWithValue("@nombre", nombre);
-            SqlParameter pamSuma = new SqlParameter();
-            pamSuma.ParameterName = "@suma";
-            pamSuma.Value = 0;
-            //  INDICAMOS LA DIRECCION DEL PARAMETRO
-            pamSuma.Direction = ParameterDirection.Output;
-            this.com.Parameters.Add(pamSuma);
-            SqlParameter pamMedia = new SqlParameter();
-            pamMedia.ParameterName = "@media";
-            pamMedia.Value = 0;
-            pamMedia.Direction = ParameterDirection.Output;
-            this.com.Parameters.Add(pamMedia);
-            SqlParameter pamPersonas = new SqlParameter();
-            pamPersonas.ParameterName = "@personas";
-            pamPersonas.Value = 0;
-            pamPersonas.Direction = ParameterDirection.Output;
-            this.com.Parameters.Add(pamPersonas);
-            this.com.CommandType = CommandType.StoredProcedure;
-            this.com.CommandText = sql;
-            await this.cn.OpenAsync();
-            this.reader = await this.com.ExecuteReaderAsync();
+            EmpleadoDepartamentoOut model =
+                await this.repo.GetEmpleadosDepartamentoAsync(nombre);
             this.lstEmpleados.Items.Clear();
-            while (await this.reader.ReadAsync())
+            foreach (string ape in model.Apellidos)
             {
-                string apellido = this.reader["APELLIDO"].ToString();
-                this.lstEmpleados.Items.Add(apellido);
+                this.lstEmpleados.Items.Add(ape);
             }
-            await this.reader.CloseAsync();
-            this.txtSumaSalarial.Text = pamSuma.Value.ToString();
-            this.txtMediaSalarial.Text = pamMedia.Value.ToString();
-            this.txtPersonas.Text = pamPersonas.Value.ToString();
-            await this.cn.CloseAsync();
-            this.com.Parameters.Clear();
+            this.txtSumaSalarial.Text = model.SumaSalarial.ToString();
+            this.txtMediaSalarial.Text = model.MediaSalarial.ToString();
+            this.txtPersonas.Text = model.Personas.ToString();
         }
     }
 }

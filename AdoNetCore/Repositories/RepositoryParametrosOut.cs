@@ -17,20 +17,21 @@ namespace AdoNetCore.Repositories
         SqlDataReader reader;
         public RepositoryParametrosOut()
         {
-            string connectionString = @"Data Source=LOCALHOST\DESARROLLO;Initial Catalog=HOSPITAL;Persist Security Info=True;User ID=SA;Trust Server Certificate=True";
+            string connectionString = @"Data Source=LOCALHOST;Initial Catalog=HOSPITAL;Persist Security Info=True;User ID=SA;Trust Server Certificate=True";
             this.cn = new SqlConnection(connectionString);
             this.com = new SqlCommand();
             this.com.Connection = this.cn;
         }
 
-        public async Task<List<string>> LoadDepartamentosAsync()
+        public async Task<List<string>> GetDepartamentosAsync()
         {
-            List<string> departamentos = new List<string>();
+            
             string sql = "SP_ALL_DEPARTAMENTOS";
             this.com.CommandType = CommandType.StoredProcedure;
             this.com.CommandText = sql;
             await this.cn.OpenAsync();
             this.reader = await this.com.ExecuteReaderAsync();
+            List<string> departamentos = new List<string>();
             while (await this.reader.ReadAsync())
             {
                 string nombre = this.reader["DNOMBRE"].ToString();
@@ -42,7 +43,7 @@ namespace AdoNetCore.Repositories
             return departamentos;
         }
 
-        public async Task<EmpleadoDepartamentoOut> LoadEmpleadosDepartamento
+        public async Task<EmpleadoDepartamentoOut> GetEmpleadosDepartamentoAsync
             (string nombre)
         {
             string sql = "SP_EMPLEADOS_DEPT_OUT";
@@ -73,15 +74,17 @@ namespace AdoNetCore.Repositories
             this.reader = await this.com.ExecuteReaderAsync();
             EmpleadoDepartamentoOut datos = new EmpleadoDepartamentoOut();
             //List<string> empleados = new List<string>();
+            List<string> apellidos = new List<string>();
             while (await this.reader.ReadAsync())
             {
                 string apellido = this.reader["APELLIDO"].ToString();
-                datos.nombre.Add(apellido);
+                apellidos.Add(apellido);
             }
             await this.reader.CloseAsync();
-            datos.suma = int.Parse(pamSuma.Value.ToString());
-            datos.media = int.Parse(pamMedia.Value.ToString());
-            datos.personas = int.Parse(pamPersonas.Value.ToString());
+            datos.Apellidos = apellidos;
+            datos.SumaSalarial = int.Parse(pamSuma.Value.ToString());
+            datos.MediaSalarial = int.Parse(pamMedia.Value.ToString());
+            datos.Personas = int.Parse(pamPersonas.Value.ToString());
             await this.cn.CloseAsync();
             this.com.Parameters.Clear();
             return datos;
