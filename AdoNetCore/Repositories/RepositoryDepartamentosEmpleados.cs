@@ -16,14 +16,14 @@ namespace AdoNetCore.Repositories
 
         public RepositoryDepartamentosEmpleados()
         {
-            string connectionString = @"Data Source=LOCALHOST\DESARROLLO;Initial Catalog=HOSPITAL;Persist Security Info=True;User ID=SA;Trust Server Certificate=True";
+            string connectionString = @"Data Source=LOCALHOST\SQLEXPRESS;Initial Catalog=HOSPITAL;Persist Security Info=True;User ID=SA;Trust Server Certificate=True";
             this.cn = new SqlConnection(connectionString);
             this.com = new SqlCommand();
         }
 
         public async Task<List<string>> GetDepartamentosAsync()
         {
-            string sql = "select DNOMBRE from DEPARTAMENTOS";
+            string sql = "select DNOMBRE from DEPT";
             this.com.Connection = this.cn;
             this.com.CommandType = CommandType.Text;
             this.com.CommandText = sql;
